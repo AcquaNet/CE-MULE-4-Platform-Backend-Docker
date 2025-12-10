@@ -1,0 +1,172 @@
+
+
+services:
+  ce-base-mule-backend:
+    build: docker_mulesoft
+    image: 92455890/ce-base-mule-server:${versionMule}
+    environment:  
+      mule_env: ${mule_env}
+      muleVersion: ${muleVersion}
+      MULEAPP_GROUP_ID: ${MULEAPP_GROUP_ID}
+      MULEAPP_ARTIFACT_ID: ${MULEAPP_ARTIFACT_ID}
+      MULEAPP_VERSION: ${MULEAPP_VERSION}
+      ATINA_REPOSITORY_PROTOCOL: ${ATINA_REPOSITORY_PROTOCOL}
+      ATINA_REPOSITORY_URL: ${ATINA_REPOSITORY_URL}
+    container_name: ce-base-mule-backend
+    ports:
+     - "${MULE_HTTP_PORT}:8081"
+     - "${MULE_HTTPS_PORT}:8082"
+    volumes:
+     - CEBackendHome:${FOLDER_ROOT}
+     - CEBackendActiveMQConf:/opt/activemq/conf
+     - CEBackendActiveMQData:/opt/activemq/data
+     - CEBackendMuleLog:/opt/mule/mule-standalone-${muleVersion}/logs
+     - CEBackendMuleApps:/opt/mule/mule-standalone-${muleVersion}/apps
+    user: root
+    networks:
+      ce-base-micronet:
+        ipv4_address: 172.42.0.2
+      ce-base-network:
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q 'DEPLOYED' /opt/mule/mule-standalone-${muleVersion}/logs/mule.log || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 50
+      start_period: 480s
+      
+  ce-base-apachemq-backend:
+    build: docker-apache
+    image: 92455890/ce-base-apachemq-backend:${versionApacheMQ}
+    container_name: ce-base-apachemq-backend
+    ports:
+     - "${MULE_MQ_WEB_CONSOL_PORT}:8161"
+     - "${MULE_MQ_AMQP_PORT}:5672"
+     - "${MULE_MQ_OPENWIRE_PORT}:61616"
+    volumes:
+     - CEBackendActiveMQConf:/opt/activemq/conf
+     - CEBackendActiveMQData:/opt/activemq/data
+    user: root
+    networks:
+      ce-base-micronet:
+        ipv4_address: 172.42.0.5
+      ce-base-network:
+    restart: always
+      
+  ce-base-maven-backend:
+    build: docker_maven
+    image: 92455890/ce-base-maven-backend-server:${versionMaven}
+    environment:  
+      MULEAPP_GROUP_ID: ${MULEAPP_GROUP_ID}
+      MULEAPP_ARTIFACT_ID: ${MULEAPP_ARTIFACT_ID}
+      MULEAPP_VERSION: ${MULEAPP_VERSION}
+      ATINA_REPOSITORY_PROTOCOL: ${ATINA_REPOSITORY_PROTOCOL}
+      ATINA_REPOSITORY_URL: ${ATINA_REPOSITORY_URL}
+    container_name: ce-base-maven-backend
+    volumes:
+     - CEBackendMuleApps:/home/apps
+     - CEBackendMavenRepository:/home/repository
+    user: root
+    depends_on:
+      ce-base-mule-backend:
+        condition: service_healthy
+    restart: "no"    
+    networks:
+      ce-base-micronet:
+        ipv4_address: 172.42.0.4
+      ce-base-network:      
+      
+  ce-base-status-viewer:
+    build: docker-status-viewer
+    image: 92455890/ce-base-status-viewer-backend-server:${versionStatusViewer}
+    environment:  
+      API_STATUS_URL: ${API_STATUS_URL}
+    container_name: ce-base-status-viewer-backend
+    user: root
+    depends_on:
+      ce-base-mule-backend:
+        condition: service_healthy
+    restart: "no"    
+    networks:
+      ce-base-micronet:
+        ipv4_address: 172.42.0.6
+      ce-base-network:         
+
+  ce-base-db-backend: 
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    container_name: ce-base-db-backend
+    ports:
+     - "${MYSQL_EXTERNAL_PORT}:${MYSQL_INTERNAL_PORT}"
+    volumes:
+     - CEBackendDBBackendConfig:${MYSQL_FILE_CONFIG}
+     - CEBackendDBBackendData:${MYSQL_DATA}
+    user: root
+    networks:
+      ce-base-micronet:
+        ipv4_address: 172.42.0.3
+      ce-base-network:
+    restart: always
+               
+volumes:
+  CEBackendHome: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendHome}
+  CEBackendActiveMQConf: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendActiveMQConf}
+  CEBackendActiveMQData: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendActiveMQData}
+  CEBackendMuleLog: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendMuleLog}
+  CEBackendMuleApps: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendMuleApps}      
+  CEBackendDBBackendConfig: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendDBBackendConfig}
+  CEBackendDBBackendData: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendDBBackendData}      
+  CEBackendMavenRepository: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${Volume_CE_base_BackendMavenRepository}      
+      
+networks:
+  ce-base-micronet:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.42.0.0/16
+  ce-base-network:
+    external: true       
