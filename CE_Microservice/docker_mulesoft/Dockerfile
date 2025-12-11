@@ -29,8 +29,8 @@ ARG MULEAPP_VERSION=1.0.0
 # ARG Repository 
 # -------------------------------------
 #
-ARG ATINA_REPOSITORY_PROTOCOL=http
-ARG ATINA_REPOSITORY_URL=157.245.236.175:8081/artifactory/libs-release
+ARG ATINA_REPOSITORY_PROTOCOL=https
+ARG ATINA_REPOSITORY_URL=jfrog.atina-connection.com/artifactory/libs-release
 #
 # ====================================
 # VARIABLES DE AMBIENTE

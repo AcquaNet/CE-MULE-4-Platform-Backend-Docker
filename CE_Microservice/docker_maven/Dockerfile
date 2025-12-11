@@ -1,5 +1,6 @@
-FROM ubuntu:18.04
-MAINTAINER javier.godino@acqua.net.ar
+FROM --platform=linux/amd64 ubuntu:22.04
+#
+LABEL MAINTAINER javier.godino@acqua.net.ar
 #
 # ====================================
 # ARGUMENTOS DE CONSTRUCCION
@@ -28,8 +29,8 @@ ARG MULEAPP_VERSION=1.0.0
 # ARG Repository 
 # -------------------------------------
 #
-ARG ATINA_REPOSITORY_PROTOCOL=http
-ARG ATINA_REPOSITORY_URL=157.245.236.175:8081/artifactory/libs-release
+ARG ATINA_REPOSITORY_PROTOCOL=https
+ARG ATINA_REPOSITORY_URL=jfrog.atina-connection.com/artifactory/libs-release
 #
 # ====================================
 # VARIABLES DE AMBIENTE
@@ -50,38 +51,45 @@ ENV ATINA_REPOSITORY_PROTOCOL ${ATINA_REPOSITORY_PROTOCOL}
 ENV ATINA_REPOSITORY_URL ${ATINA_REPOSITORY_URL}
 #
 # ====================================
+# Configuración de timezone y locale 
+# antes de instalar paquetes
+# ====================================
+#
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Buenos_Aires
+ENV LANG=es_AR.UTF-8
+ENV LANGUAGE=es_AR.UTF-8
+ENV LC_ALL=es_AR.UTF-8
+#
+# ====================================
 # Actualizacion del Ubuntu
 # ====================================
-RUN apt update
-
+RUN apt-get update && apt-get install -y \
+    wget \
+    iproute2 \
+    net-tools \
+    bzip2 \
+    unzip \
+    curl \
+    locales \
+    jq \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
 # ====================================
 # Set TimeZone
 # ====================================
-RUN export DEBIAN_FRONTEND=noninteractive
-RUN ln -fs /usr/share/zoneinfo/America/BuenosAires /etc/localtime
-RUN apt-get install -y tzdata
-RUN dpkg-reconfigure --frontend noninteractive tzdata
-
+#
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata
+#
 # ====================================
-# Instalacion de Software Requerido
-# ====================================
-RUN apt-get install -y wget
-RUN apt-get install -y iproute2
-RUN apt-get install -y net-tools 
-RUN apt-get install -y bzip2
-RUN apt-get install -y unzip
-RUN apt-get install -y curl
-RUN apt-get install -y locales
-RUN apt-get install -y jq
-
-# ====================================
-# Instalacion de Idioma
+# Configuración de Locale
 # ====================================
 #
-RUN locale-gen es_ES.utf8
-ENV LANG es_ES.utf8
-ENV LANGUAGE es_ES.utf8  
-ENV LC_ALL es_ES.utf8  
+RUN locale-gen es_AR.UTF-8 && \
+    update-locale LANG=es_AR.UTF-8
+#
 #
 # ===================================================
 # Instalacion de Java OpenJDK Modificado 64 Bits JDK
@@ -122,9 +130,10 @@ COPY images/settings.xml /usr/share/maven/conf/
 # ====================================
 #
 RUN mkdir -p /home
-RUN mkdir -p /home/apps
-RUN mkdir -p /home/repository
-RUN mkdir -p /home/logs
+RUN mkdir -p /home/apps && \
+    mkdir -p /home/repository && \
+    mkdir -p /home/logs
+#
 #
 # ====================================
 # Start
