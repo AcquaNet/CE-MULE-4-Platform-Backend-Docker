@@ -1,0 +1,4 @@
+CE_Microservice/01-create-volumes.bat
+CE_Microservice/docker_maven/java64/OpenJDK8U-jdk_x64_linux_hotspot_8u362b09.tar.gz
+CE_Microservice/docker_mulesoft/images/mule-standalone-4.4.0.tar.gz
+CE_Microservice/docker_mulesoft/java64/OpenJDK8U-jdk_x64_linux_hotspot_8u362b09.tar.gz

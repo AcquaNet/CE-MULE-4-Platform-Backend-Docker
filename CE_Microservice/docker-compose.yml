@@ -164,9 +164,6 @@ volumes:
       
 networks:
   ce-base-micronet:
-    driver: bridge
-    ipam:
-     config:
-       - subnet: 172.42.0.0/16
+    external: true
   ce-base-network:
     external: true       
