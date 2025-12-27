@@ -11,14 +11,21 @@ LABEL maintainer="javier.godino@acqua.net.ar"
 #
 ARG javaFolder=/var/java
 ARG javaType=JDK
-ARG javaJDKImage=OpenJDK8U-jdk_x64_linux_hotspot_8u362b09.tar.gz
-ARG javaJDKRootFolder=jdk8u362-b09
+#ARG javaJDKImage=OpenJDK8U-jdk_x64_linux_hotspot_8u362b09.tar.gz
+#ARG javaJDKRootFolder=jdk8u362-b09
+#
+#
+ARG javaJDKImage=OpenJDK17U-jdk_x64_linux_hotspot_17.0.17_10.tar.gz
+ARG javaJDKRootFolder=jdk-17.0.17+10
+#
+# curl -L -o OpenJDK17U-jdk_x64_linux_hotspot_17.0.17_10.tar.gz \
+# "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.17+10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.17_10.tar.gz"
 #
 # -------------------------------------
 # ARG MULESOFT
 # -------------------------------------
 #
-ARG muleVersion=4.4.0
+ARG muleVersion=4.8.0
 ARG mule_env=dev
 #
 ARG MULEAPP_GROUP_ID=com.sota
@@ -118,6 +125,8 @@ RUN locale-gen es_AR.UTF-8 && \
 # Instalacion de Java OpenJDK Modificado 64 Bits JDK
 # ===================================================
 #
+# Descargas: https://download.eclipse.org/temurin-compliance/temurin/
+# 
 RUN mkdir ${javaFolder}
 RUN cd ${javaFolder} 
 COPY java64/${javaJDKImage} ${javaFolder}/
