@@ -1,4 +1,150 @@
-CE_Microservice/01-create-volumes.bat
+# ====================================================================
+# Mule Docker Deployment .gitignore
+# For CE-MULE-4-Platform-Backend-Docker repository
+# ====================================================================
+
+# ====================================================================
+# Environment and Secrets
+# ====================================================================
+
+# Environment files with sensitive credentials
+.env
+.env.local
+.env.*.local
+*.env.bak
+.env.backup
+
+# ====================================================================
+# Docker Runtime Data
+# ====================================================================
+
+# Docker volumes (runtime data - auto-created)
+volumes/
+**/volumes/
+
+# Mule application logs (generated at runtime)
+*.log
+*.log.*
+logs/
+
+# Mule deployed applications (downloaded from Artifactory)
+CE_Microservice/volumes/worker1/apps/*.jar
+CE_Microservice/volumes/worker2/apps/*.jar
+
+# ActiveMQ data
+CE_Microservice/volumes/activemq/data/
+
+# MySQL data
+CE_Microservice/volumes/mysql/data/
+
+# Maven local repository cache
+CE_Microservice/volumes/maven/.m2/
+
+# ====================================================================
+# Large Binary Files (Keep in SOTA/_sota instead)
+# ====================================================================
+
+# Java JDK archives
 CE_Microservice/docker_maven/java64/OpenJDK8U-jdk_x64_linux_hotspot_8u362b09.tar.gz
-CE_Microservice/docker_mulesoft/images/mule-standalone-4.4.0.tar.gz
 CE_Microservice/docker_mulesoft/java64/OpenJDK8U-jdk_x64_linux_hotspot_8u362b09.tar.gz
+
+# Mule runtime archives
+CE_Microservice/docker_mulesoft/images/mule-standalone-4.4.0.tar.gz
+
+# Volume creation scripts (Windows-specific)
+CE_Microservice/01-create-volumes.bat
+
+# ====================================================================
+# Operating System Files
+# ====================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ====================================================================
+# IDE and Editor Files
+# ====================================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# ====================================================================
+# Temporary and Backup Files
+# ====================================================================
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.backup
+*~
+
+# PID files
+*.pid
+
+# ====================================================================
+# Docker Build Cache
+# ====================================================================
+
+# Docker build context (if applicable)
+.dockerignore
+
+# Docker compose override files (environment-specific)
+docker-compose.override.yml
+
+# ====================================================================
+# Notes
+# ====================================================================
+# This .gitignore is configured for Mule Docker deployment infrastructure:
+#
+# ✅ TRACKED (committed to git):
+#   - docker-compose.yml
+#   - Dockerfiles
+#   - Configuration templates
+#   - Shell scripts (.sh)
+#   - .env.example (template without secrets)
+#   - Documentation
+#
+# ❌ NOT TRACKED (git-ignored):
+#   - volumes/ (runtime data - auto-created by Docker)
+#   - .env (contains secrets and passwords)
+#   - *.log (runtime logs)
+#   - Large binary files (JDK, Mule runtime archives)
+#   - Maven cache and downloaded apps
+#   - Database and ActiveMQ data
+#
+# Large binaries should be:
+#   1. Stored in CE-Platform/_sota/ (offline installers)
+#   2. Downloaded during Docker build from official sources
+#   3. Distributed via artifact repository (JFrog Artifactory)
+#
+# To start: docker-compose up -d
+# To stop: docker-compose down
+# To reset all data: docker-compose down -v
+# ====================================================================
